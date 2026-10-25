@@ -1,6 +1,7 @@
 """Count collected pages: python tools/count_pages.py"""
 
 import os
+
 from pypdf import PdfReader
 
 CODE = (
