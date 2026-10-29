@@ -19,9 +19,10 @@ provider pricing page, and input/output prices.
 Use the records in `logs/cost.jsonl` and the `/usage` endpoint
 to calculate average input and output tokens per question.
 
-- Total successful questions: TODO
-- Average input tokens per question: TODO
-- Average output tokens per question: TODO
+- Total successful questions: 14
+- Average input tokens per question: 8.64
+- Average output tokens per question: 20.29
+
 
 Calculate averages using successful calls only.
 
