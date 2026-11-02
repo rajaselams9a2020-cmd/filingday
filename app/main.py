@@ -11,6 +11,9 @@ from app.config import Settings, get_settings
 from app.cost import log_call
 from app.llm.base import LLMError, StreamResult
 from app.llm.factory import build_provider
+from app.rag.context import build_context, build_rag_messages
+from app.rag.ingest import extract_pdf_text
+from app.rag.retriever import retrieve
 from app.schemas import ChatRequest
 from app.usage import get_usage
 
@@ -31,6 +34,24 @@ def health(settings: SettingsDep) -> dict:
 
 @app.post("/chat")
 async def chat(request: ChatRequest, settings: SettingsDep) -> StreamingResponse:
+
+    pdf_path = "data/gst_docs/faqs-registration.pdf"
+    pages = extract_pdf_text(pdf_path)
+
+    user_questions = [
+        message.content
+        for message in request.messages
+        if message.role == "user"
+    ]
+
+    if user_questions:
+        relevant_pages = retrieve(user_questions[-1], pages, top_k=3)
+    else:
+        relevant_pages = []
+
+    context = build_context(relevant_pages)
+    rag_messages = build_rag_messages(request.messages, context)
+
     provider = build_provider(settings)
     result = StreamResult()
     started = time.perf_counter()
@@ -41,7 +62,7 @@ async def chat(request: ChatRequest, settings: SettingsDep) -> StreamingResponse
 
         try:
             async for piece in provider.stream_chat(
-                request.messages, request.temperature, result
+                rag_messages, request.temperature, result
             ):
                 
                 yield f"event: token\ndata: {json.dumps({'text': piece})}\n\n"

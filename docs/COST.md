@@ -3,10 +3,10 @@
 
 ## 1. Model and Pricing
 
-- Provider: FakeProvider (local testing)
-- Model: fake-model
-- Input price per million tokens: $0 (fake provider)
-- Output price per million tokens: $0 (fake provider)
+- Provider: FakeProvider 
+- Model label: llama3.1:8b 
+- Input price per million tokens: $0 
+- Output price per million tokens: $0 
 
 The fake provider is used for testing without a real LLM API.
 Therefore, these results do not represent production model pricing.
@@ -14,17 +14,16 @@ Therefore, these results do not represent production model pricing.
 For production usage, update this section with the actual model name,
 provider pricing page, and input/output prices.
 
-## 2. Average Token Usage Per Question
+## 2. Average Token Usage Per Call
 
-Use the records in `logs/cost.jsonl` and the `/usage` endpoint
-to calculate average input and output tokens per question.
+Based on 15 successful calls recorded in `logs/cost.jsonl`.
 
-- Total successful questions: 14
-- Average input tokens per question: 8.64
-- Average output tokens per question: 20.29
+- Total successful calls: 15
+- Average input tokens per call: 175.00
+- Average output tokens per call: 20.53
 
-
-Calculate averages using successful calls only.
+The averages include the RAG test call, which used 2,504 input tokens.
+Token counts are estimated by the Fake Provider.
 
 ## 3. Estimated Cost Per Question
 
@@ -34,7 +33,7 @@ Cost per question =
 (input tokens × input price per million
 + output tokens × output price per million) / 1,000,000
 
-- Estimated cost per question: TODO
+- Estimated cost per question: $0.00 (Fake Provider; simulated cost)
 
 Use the actual model's published input and output token prices.
 
@@ -42,7 +41,7 @@ Use the actual model's published input and output token prices.
 
 Cost for 1,000 questions = average cost per question × 1,000
 
-- Estimated cost for 1,000 questions: TODO
+- Estimated cost for 1,000 questions:  $0.00 (Fake Provider; simulated cost)
 
 This is an estimate. Actual costs depend on prompt length, answer length,
 model pricing, retries, and fallback usage.

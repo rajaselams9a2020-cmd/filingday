@@ -20,7 +20,7 @@ RAW = "data/raw"
 MANIFEST = "data/manifest.csv"
 
 HEADERS = {
-    "User-Agent": "ExamateStudentProject/1.0 (learning project; contact: your-email@example.com)"
+    "User-Agent": "ExamateStudentProject/1.0 (learning project; contact:rajaselams9a2020@gmail.com)"
 }
 
 DELAY = 2
