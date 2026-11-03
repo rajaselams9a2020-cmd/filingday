@@ -3,10 +3,9 @@ import json
 import time
 from collections.abc import AsyncIterator
 from typing import Annotated
-
 from fastapi import Depends, FastAPI
-from fastapi.responses import StreamingResponse
-
+import psycopg
+from fastapi.responses import JSONResponse, StreamingResponse
 from app.config import Settings, get_settings
 from app.cost import log_call
 from app.llm.base import LLMError, StreamResult
@@ -30,7 +29,21 @@ def health(settings: SettingsDep) -> dict:
         "app": settings.app_name,
         "environment": settings.environment,
     }
+@app.get("/ready")
+def ready(settings: SettingsDep):
+    """Readiness check for the database."""
+    if not settings.database_url:
+        return {"status": "ready", "database": "not configured"}
 
+    try:
+        with psycopg.connect(settings.database_url, connect_timeout=3) as conn:
+            conn.execute("SELECT 1")
+        return {"status": "ready", "database": "connected"}
+    except Exception:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not ready", "database": "unavailable"},
+        )
 
 @app.post("/chat")
 async def chat(request: ChatRequest, settings: SettingsDep) -> StreamingResponse:

@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     app_name: str = "examate-rag"
     environment: str = "local"  # local | ci | production
-
+    database_url: str = ""
     llm_provider: str = "fake"  # fake | openai_compat
     llm_base_url: str = "http://localhost:11434/v1"
     llm_api_key: str = ""

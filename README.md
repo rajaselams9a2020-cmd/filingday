@@ -1,204 +1,315 @@
-FilingDay — AI-Powered GST Assistant
-FilingDay is a proposed AI-powered assistant for Chartered Accountant (CA) firms that helps staff find answers to GST-related questions quickly using official tax documents. It is designed to reduce repetitive research, provide source-cited answers, and support high traffic during GST filing deadlines.
-Project status: Project concept / implementation plan. Update the technology stack, setup commands, and performance results to match the actual codebase before publishing.
+# FilingDay — AI-Powered GST Assistant
 
-Table of Contents
+FilingDay is an AI-powered GST assistant designed to help Chartered Accountant (CA) firms find information from GST-related documents. It uses document retrieval and language models to generate answers based on available source material.
+
+**Project status:** Initial implementation of a GST RAG pipeline with a FastAPI backend, PostgreSQL with pgvector, LLM provider integration, fallback handling, and cost tracking. Additional features are planned.
+
+## Table of Contents
+
 - Problem Statement
 - Objectives
-- Key Features
+- Implemented Features
+- Planned Features
 - Knowledge Sources
 - How It Works
-- Proposed Architecture
 - Technology Stack
 - Getting Started
-- Example Questions
-- Performance Goals
+- Run with Docker
+- Running Tests
+- API Health Checks
 - Security and Reliability
 - Limitations
 - Future Enhancements
 - Official Resources
-Problem Statement
-CA firms handle GST compliance for multiple clients. During filing deadlines, staff often need to answer repeated questions about tax rates, notifications, input tax credit (ITC), late fees, and return-filing rules.
 
-Manually searching through large collections of Acts, Rules, circulars, and notifications is time-consuming. Traffic can also increase sharply on deadline days, making fast and reliable access to information important.
+## Problem Statement
 
-FilingDay aims to address these challenges through document retrieval, AI-generated answers with citations, caching, and a human-approved email workflow.
-Objectives
-- Answer common GST questions in plain language.
-- Ground answers in official documents and provide citations.
-- Reduce repeated processing through exact-match and semantic caching.
-- Surface frequently asked questions during filing deadlines.
-- Draft client replies and invoice reminders for CA review.
-- Test latency and reliability under increased traffic.
-Key Features
-1. GST Question Answering
-Users ask questions in natural language. The system retrieves relevant passages from its indexed GST knowledge base and uses them to draft an answer with source references.
-2. Official Document Knowledge Base
-The planned knowledge base includes:
-- Central GST notifications
-- GST rate notifications
-- Integrated GST (IGST) notifications
-- GST circulars
-- Central Goods and Services Tax (CGST) Act
-- CGST Rules
-The initial scope targets 3,000+ pages of source material. Documents should be parsed, indexed, versioned, and checked for amendments and effective dates.
-3. Redis Caching
-- Exact-match cache: Reuses an answer for an identical normalized question.
-- Semantic cache: Finds questions with sufficiently similar meaning and may reuse a previously generated answer.
-- Cache invalidation: Cached legal answers must be refreshed or invalidated when relevant source documents, effective dates, or legal conditions change.
-Semantic similarity alone is not enough to guarantee that two tax questions have the same legal answer. The cache should account for important context such as tax period and taxpayer circumstances.
-4. Deadline-Day Dashboard
-Displays the top 20 questions from the previous hour, along with their validated, cited answers. This helps staff quickly find answers that have already been researched.
-5. Human-Approved Email Agent
-The planned agent can:
-1. Read an authorized client email.
-2. Identify the GST question or missing-document issue.
-3. Retrieve relevant official sources.
-4. Draft a response with citations.
-5. Draft an invoice reminder when appropriate.
-6. Send nothing until an authorized CA partner approves the draft.
-6. Load Testing and Monitoring
-Test the system under deadline-day traffic and monitor cache hit rate, p95 latency, error rate, and throughput.
-Knowledge Sources
-Primary source:
-- CBIC GST Portal
-Use official documents as the source of truth. Record each document's title, notification or circular number, publication date, effective date where applicable, source URL, and version. Validate extracted text and citations before relying on it for tax-related answers.
-How It Works
-1. Question submitted: A staff member asks a GST question.
-2. Cache lookup: FilingDay checks Redis for a valid exact or semantic cache match.
-3. Document retrieval: If no valid cache entry exists, the system searches the indexed official documents using keyword and/or vector search.
-4. Answer generation: The language model drafts an answer based on retrieved passages.
-5. Citation validation: The system attaches source references and should verify that cited passages support the answer.
-6. Response returned: The user receives the answer with citations.
-7. Cache update: Eligible answers may be cached with appropriate expiry and invalidation rules.
-Proposed Architecture
-CA Staff
-   |
-   v
-Web UI / Client
-   |
-   v
-Backend API (e.g., FastAPI)
-   |
-   +----> Redis Cache
-   |         |
-   |         +---- Cache hit: return validated answer
-   |
-   +----> Retrieval Pipeline
-   |         |
-   |         +----> Document Store / Vector Search
-   |         |          |
-   |         |          +----> Official GST documents
-   |         |
-   |         +----> LLM generates grounded answer
-   |                    |
-   |                    +----> Answer + citations
-   |
-   +----> Monitoring / Logs
+CA firms handle GST compliance for multiple clients. Staff frequently need to research GST rates, notifications, input tax credit (ITC), late fees, and return-filing rules.
 
-Authorized Email Agent
-   |
-   v
-Draft reply + citations
-   |
-   v
-CA Partner Approval
-   |
-   v
-Send approved email
-This is a proposed architecture, not a claim that these components are already implemented.
-Technology Stack
-The following stack is a suggested starting point; replace it with the tools used in the actual implementation.
-Component	Suggested option	Purpose
-Backend API	Python + FastAPI	Handle user questions and API requests
-Document processing	PDF/text extraction libraries	Extract text and metadata from source documents
-Relational storage	PostgreSQL	Store document metadata, users, and audit records
-Semantic retrieval	PostgreSQL with vector extension or a vector database	Find relevant passages by meaning
-Cache	Redis	Cache repeat answers and support fast lookups
-Embeddings	An embedding model	Represent queries and passages for semantic retrieval
-Answer generation	An LLM	Generate answers grounded in retrieved passages
-Load testing	k6, Locust, or equivalent	Simulate traffic and measure performance
+Manually searching through Acts, Rules, circulars, and notifications can be time-consuming. FilingDay aims to simplify this research by retrieving relevant document passages and generating answers with source references.
 
+## Objectives
 
-Getting Started
-The exact installation steps depend on the implementation. The following is an example for a Python/FastAPI backend.
-Prerequisites
-- Python 3.11 or a compatible version
-- Redis
-- PostgreSQL or another configured document/vector store
-- API credentials for the selected language model, if using a hosted model
+- Answer GST-related questions in plain language.
+- Retrieve relevant information from GST documents.
+- Generate answers grounded in retrieved context.
+- Provide source references to support answers.
+- Improve reliability through LLM fallback handling.
+- Track LLM usage, latency, and estimated cost.
+- Support future improvements for deadline-day traffic.
+
+## Implemented Features
+
+### 1. GST Question Answering
+
+Users can submit questions through the API. The application retrieves relevant passages from the available GST document knowledge base and uses them as context for answer generation.
+
+### 2. Document Retrieval
+
+- Extract text from PDF documents.
+- Retrieve relevant passages using the implemented retrieval pipeline.
+- Include source and page information in retrieved context.
+
+### 3. LLM Integration
+
+- Supports the configured LLM provider.
+- Includes a fake provider for local development and testing.
+- Supports streaming responses.
+- Includes retry and fallback handling for eligible provider failures.
+
+### 4. LLM Cost Tracking
+
+- Records input and output token usage.
+- Estimates LLM call cost using configured token prices.
+- Records latency and provider information.
+- Appends call records to a JSON Lines log file.
+
+### 5. Health and Readiness Checks
+
+- `/health` checks whether the API is running.
+- `/ready` checks application readiness, including database connectivity.
+
+### 6. PostgreSQL with pgvector
+
+The Docker setup includes PostgreSQL with the pgvector extension for vector-related database functionality.
+
+## Planned Features
+
+The following features are future enhancements and should not be considered implemented:
+
+- Exact-match and semantic caching using Redis.
+- Deadline-day dashboard showing frequently asked questions.
+- Human-approved email drafting and sending workflow.
+- Automated ingestion of new GST notifications and circulars.
+- Large-scale document indexing and version management.
+- Load testing and performance monitoring.
+
+## Knowledge Sources
+
+The initial knowledge base uses GST-related PDF documents available to the project.
+
+Official source:
+
+- CBIC GST Portal: https://cbic-gst.gov.in/
+
+Official documents should be treated as the source of truth. Document titles, notification numbers, publication dates, effective dates, and source references should be maintained wherever available.
+
+## How It Works
+
+1. **Question submission:** A user submits a GST-related question.
+2. **Document retrieval:** The application searches the available GST documents for relevant passages.
+3. **Context construction:** Retrieved passages are assembled with source and page information.
+4. **Answer generation:** The configured LLM generates an answer using the retrieved context.
+5. **Streaming response:** The API can stream the generated response.
+6. **Usage tracking:** LLM usage, latency, and estimated cost are recorded.
+
+## Technology Stack
+
+| Component | Technology | Purpose |
+|---|---|---|
+| Backend API | Python, FastAPI | Handle API requests |
+| Document processing | PDF text extraction | Extract GST document content |
+| Database | PostgreSQL | Store application data |
+| Vector extension | pgvector | Support vector-related database operations |
+| LLM integration | Configured LLM provider | Generate answers |
+| Local testing | Fake LLM provider | Test without a hosted LLM |
+| Reliability | Retry and fallback handling | Handle eligible provider failures |
+| Cost tracking | JSON Lines logs | Record token usage and estimated cost |
+| Containerization | Docker, Docker Compose | Run the API and database |
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.12 or compatible version
 - Git
-1. Clone the repository
-git clone <YOUR_REPOSITORY_URL>
-cd FilingDay
-Replace <YOUR_REPOSITORY_URL> with the actual repository URL.
-2. Create and activate a virtual environment
+- Docker Desktop with Docker Compose (for Docker setup)
+- LLM credentials if using a hosted provider
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/rajaselams9a2020-cmd/filingday.git
+cd filingday
+```
+
+### 2. Create a virtual environment
+
+```powershell
 python -m venv .venv
-macOS/Linux:
-source .venv/bin/activate
-Windows PowerShell:
+```
+
+Activate it in Windows PowerShell:
+
+```powershell
 .venv\Scripts\Activate.ps1
-3. Install dependencies
-If the project includes a requirements.txt file:
+```
+
+### 3. Install dependencies
+
+```powershell
 pip install -r requirements.txt
-If it does not, create the dependency file based on the packages actually used by the project.
-4. Configure environment variables
-Create a local .env file based on the project's .env.example, if available. Typical settings may include:
-APP_ENV=development
-REDIS_URL=redis://localhost:6379/0
-DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/filingday
-LLM_API_KEY=replace_with_your_key
-These names are illustrative. Match them to the application's actual configuration. Never commit API keys, passwords, client emails, or other secrets to Git.
-5. Start dependencies and the backend
-Start Redis and PostgreSQL using your local installation or the project's container configuration. Then run the application using its actual entry point. For example, if the FastAPI app is exposed as app.main:app:
+```
+
+### 4. Configure environment variables
+
+Create a `.env` file using `.env.example` as the reference.
+
+Configure the required values for the selected LLM provider and application environment.
+
+**Important:** Never commit `.env` files, API keys, passwords, or other secrets to Git.
+
+### 5. Run the application locally
+
+Use the application's configured environment and database settings, then start the API:
+
+```powershell
 uvicorn app.main:app --reload
-The example command will work only if that module path matches the repository.
-6. Run tests
-Use the test command configured by the project. For a Python project using pytest:
-pytest
-Example Questions
-These are example evaluation prompts, not pre-verified tax advice:
-1. What late fee applies when GSTR-3B is filed after its due date?
-2. Which notification changed the GST rate for a particular restaurant service, and from what date?
-3. Can ITC be claimed on a car used by a company director?
-Answers may depend on the relevant tax period, taxpayer category, vehicle use, statutory exceptions, and amendments. FilingDay should request additional context when necessary and cite the applicable official provisions.
-Performance Goals
-Metric	Initial target	Measurement notes
-Cache hit rate	60% or higher	Define the eligible request population and measure hits over a representative workload
-p95 cache-hit latency	Under 1 second	Measure cache lookup and response latency separately
-Deadline-day load	Simulate a 10× traffic spike	Define baseline traffic and target requests per second
-Answer quality	Grounded answers with supporting citations	Evaluate citation correctness and legal accuracy using a test set
-Reliability	Track error rate and availability	Test under load and during dependency failures
+```
 
+## Run with Docker
 
-A sub-second p95 target may be realistic for cache hits, but a cache miss requiring retrieval and LLM generation may take longer. Report cache-hit and end-to-end latency separately. Do not report these targets as achieved until they have been measured.
-Security and Reliability
-- Restrict access to client emails and tax data using role-based permissions.
-- Require explicit CA partner approval before sending client-facing messages.
-- Keep audit records of generated drafts, approvals, and sent messages.
-- Protect API credentials and sensitive configuration using environment variables or a secrets manager.
-- Validate source citations and display document dates and effective dates where available.
-- Use cache expiry and legal-change invalidation to avoid serving stale answers.
-- Log operational metadata carefully; avoid logging unnecessary personal or confidential client data.
-- Treat retrieved documents and email content as untrusted input.
-- Monitor errors, throughput, cache hit rate, and latency during load tests.
-Limitations
-- AI-generated answers can be incomplete or incorrect; citations and legal review remain important.
-- The accuracy of answers depends on document coverage, extraction quality, retrieval quality, and up-to-date source material.
-- Semantic caching can return an unsuitable answer if legally important context differs.
-- GST treatment may depend on facts not included in a short question.
-- The system supports professional work; it does not replace a qualified CA's judgment.
-Future Enhancements
-- Automated scheduled ingestion of new CBIC notifications and circulars.
-- Version-aware retrieval and amendment comparison.
-- Multilingual queries, including Tamil and English.
-- User feedback and a reviewed GST question-and-answer library.
-- Role-based access and organization-level data isolation.
-- Dashboard analytics for popular questions and unresolved queries.
-- Automated regression tests for legal updates and citation correctness.
-Official Resources
-- CBIC GST Portal
-Always verify tax positions against the applicable legislation, notifications, circulars, and effective dates.
-License
-Add the license selected for this project before public distribution.
+### Prerequisites
+
+- Docker Desktop installed and running.
+- Docker Compose enabled.
+
+### 1. Configure environment variables
+
+Create a `.env` file from `.env.example` and configure the required values.
+
+### 2. Build and start the services
+
+```powershell
+docker compose up --build
+```
+
+This starts:
+
+- FastAPI application
+- PostgreSQL with pgvector
+
+The API is available at:
+
+`http://localhost:8001`
+
+PostgreSQL is exposed on port `5432`.
+
+### 3. Check the API
+
+Open a second PowerShell terminal and run:
+
+```powershell
+curl.exe http://localhost:8001/health
+```
+
+Check application readiness:
+
+```powershell
+curl.exe http://localhost:8001/ready
+```
+
+### 4. Useful Docker commands
+
+Check running containers:
+
+```powershell
+docker compose ps
+```
+
+View API logs:
+
+```powershell
+docker compose logs -f api
+```
+
+Stop the database:
+
+```powershell
+docker compose stop db
+```
+
+Start the database:
+
+```powershell
+docker compose start db
+```
+
+Stop and remove containers:
+
+```powershell
+docker compose down
+```
+
+The named PostgreSQL volume is preserved when using `docker compose down`.
+
+**Warning:** `docker compose down -v` deletes the database volume and its stored data. Use it only when you intentionally want to remove that data.
+
+## Running Tests
+
+Run the test suite:
+
+```powershell
+python -m pytest -v
+```
+
+The current test suite has **30 passing tests**.
+
+Test coverage includes:
+
+- API health checks
+- Chat streaming
+- LLM provider behavior
+- Retry and fallback handling
+- Cost logging
+- GST document retrieval
+- RAG context construction
+
+Test results may change as the codebase is updated.
+
+## API Health Checks
+
+| Endpoint | Purpose |
+|---|---|
+| `/health` | Check whether the API is running |
+| `/ready` | Check whether the application and database are ready |
+
+## Security and Reliability
+
+- Keep API credentials and passwords in environment variables.
+- Do not commit `.env` files.
+- Keep `.env` excluded from the Docker build context.
+- Use database health checks before starting dependent services.
+- Use retry and fallback handling for eligible LLM failures.
+- Avoid logging confidential client information.
+- Verify generated GST answers against applicable official documents.
+- Require professional review before relying on AI-generated tax information.
+
+## Limitations
+
+- AI-generated answers may be incomplete or incorrect.
+- Answer quality depends on the available documents and retrieval quality.
+- Legal applicability may depend on tax period, taxpayer circumstances, and amendments.
+- The current implementation does not include all proposed caching, dashboard, or email-agent features.
+- FilingDay does not replace a qualified Chartered Accountant's professional judgment.
+
+## Future Enhancements
+
+- Redis-based exact-match and semantic caching.
+- Automated GST document ingestion.
+- Document versioning and amendment tracking.
+- Deadline-day question dashboard.
+- Human-approved email drafting workflow.
+- Tamil and multilingual question support.
+- Load testing and performance monitoring.
+- Improved citation validation.
+
+## Official Resources
+
+- CBIC GST Portal: https://cbic-gst.gov.in/
+
+Always verify GST-related answers against the applicable legislation, notifications, circulars, and effective dates.
+
+## License
+
 Add the license selected for this project before public distribution.
