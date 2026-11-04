@@ -18,6 +18,13 @@ from app.schemas import ChatRequest
 from app.usage import get_usage
 
 app = FastAPI(title="Examate RAG starter", version="0.1.0")
+@app.get("/")
+def root() -> dict:
+    return {
+        "message": "You are on FilingDay root page",
+        "status": "ok",
+    }
+
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
