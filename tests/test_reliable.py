@@ -24,10 +24,7 @@ async def test_fallback_runs_when_primary_is_unavailable():
     result = StreamResult()
     messages = [Message(role="user", content="Hello")]
 
-    chunks = [
-        chunk
-        async for chunk in provider.stream_chat(messages, 0.2, result)
-    ]
+    chunks = [chunk async for chunk in provider.stream_chat(messages, 0.2, result)]
 
     assert "".join(chunks).startswith("You asked: Hello")
     assert result.fallback_used is True

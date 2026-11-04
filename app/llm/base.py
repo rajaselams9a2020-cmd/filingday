@@ -1,4 +1,5 @@
 """The provider abstraction: the rest of the app only knows this interface."""
+
 from collections.abc import AsyncIterator
 from typing import Protocol
 

@@ -1,5 +1,5 @@
-
 """Read cost logs and aggregate LLM usage by UTC date."""
+
 import json
 from collections import defaultdict
 from pathlib import Path

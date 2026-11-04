@@ -3,10 +3,10 @@
 
 ## 1. Model and Pricing
 
-- Provider: FakeProvider 
-- Model label: llama3.1:8b 
-- Input price per million tokens: $0 
-- Output price per million tokens: $0 
+- Provider: FakeProvider
+- Model label: llama3.1:8b
+- Input price per million tokens: $0
+- Output price per million tokens: $0
 
 The fake provider is used for testing without a real LLM API.
 Therefore, these results do not represent production model pricing.

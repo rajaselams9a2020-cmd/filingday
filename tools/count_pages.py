@@ -4,10 +4,7 @@ import os
 
 from pypdf import PdfReader
 
-CODE = (
-    ".py", ".java", ".go", ".c", ".h", ".js", ".ts",
-    ".scala", ".rs", ".kt", ".yaml", ".yml"
-)
+CODE = (".py", ".java", ".go", ".c", ".h", ".js", ".ts", ".scala", ".rs", ".kt", ".yaml", ".yml")
 
 pdf_pages = 0
 html = 0
@@ -37,8 +34,5 @@ for folder, _, files in os.walk("data/raw"):
             print(f"    1 file   {p}")
 
 print()
-print(
-    f"PDF pages: {pdf_pages} | HTML pages: {html} "
-    f"| code files: {code} | broken files: {broken}"
-)
+print(f"PDF pages: {pdf_pages} | HTML pages: {html} | code files: {code} | broken files: {broken}")
 print(f"TOTAL pages for DATASET.md: {pdf_pages + html}")

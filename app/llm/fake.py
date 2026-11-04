@@ -1,4 +1,5 @@
 """A deterministic provider for tests, CI and offline demos. No network, no key."""
+
 import asyncio
 from collections.abc import AsyncIterator
 

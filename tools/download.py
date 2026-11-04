@@ -19,9 +19,7 @@ import requests
 RAW = "data/raw"
 MANIFEST = "data/manifest.csv"
 
-HEADERS = {
-    "User-Agent": "ExamateStudentProject/1.0 (learning project; contact:rajaselams9a2020@gmail.com)"
-}
+HEADERS = {"User-Agent": "ExamateStudentProject/1.0 (learning project; contact:rajaselams9a2020@gmail.com)"}
 
 DELAY = 2
 robots = {}
@@ -59,13 +57,7 @@ def main(list_file):
         log = csv.writer(mf)
 
         if new_manifest:
-            log.writerow([
-                "file",
-                "source_url",
-                "downloaded_on",
-                "bytes",
-                "sha256"
-            ])
+            log.writerow(["file", "source_url", "downloaded_on", "bytes", "sha256"])
 
         with open(list_file, encoding="utf-8") as fh:
             urls = [u.strip() for u in fh]
@@ -85,11 +77,7 @@ def main(list_file):
                 continue
 
             try:
-                r = requests.get(
-                    url,
-                    headers=HEADERS,
-                    timeout=30
-                )
+                r = requests.get(url, headers=HEADERS, timeout=30)
                 r.raise_for_status()
 
             except requests.exceptions.RequestException as e:
@@ -102,13 +90,7 @@ def main(list_file):
 
             digest = hashlib.sha256(r.content).hexdigest()[:16]
 
-            log.writerow([
-                path,
-                url,
-                date.today().isoformat(),
-                len(r.content),
-                digest
-            ])
+            log.writerow([path, url, date.today().isoformat(), len(r.content), digest])
             mf.flush()
 
             print("saved", path, len(r.content), "bytes")

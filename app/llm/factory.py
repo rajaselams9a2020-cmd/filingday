@@ -1,4 +1,3 @@
-
 from app.config import Settings
 from app.llm.fake import FakeProvider
 from app.llm.openai_compat import OpenAICompatProvider
@@ -19,9 +18,7 @@ def build_provider(settings: Settings):
         )
 
     else:
-        raise ValueError(
-            f"Unsupported LLM provider: {settings.llm_provider}"
-        )
+        raise ValueError(f"Unsupported LLM provider: {settings.llm_provider}")
 
     if not settings.llm_fallback_model:
         return primary

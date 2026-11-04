@@ -9,12 +9,11 @@ def build_context(pages: list[dict]) -> str:
     sections = []
 
     for page in pages:
-        sections.append(
-            f"[Source: {page['source']}, Page: {page['page']}]\n"
-            f"{page['text']}"
-        )
+        sections.append(f"[Source: {page['source']}, Page: {page['page']}]\n{page['text']}")
 
     return "\n\n".join(sections)
+
+
 def build_rag_messages(messages: list, context: str) -> list:
     """Add retrieved GST context to the conversation's system message."""
     rag_instruction = (

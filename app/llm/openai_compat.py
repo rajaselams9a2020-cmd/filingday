@@ -1,4 +1,3 @@
-
 import asyncio
 import json
 import random
@@ -76,24 +75,14 @@ class OpenAICompatProvider:
                         json=payload,
                     ) as response:
                         if response.status_code in RETRYABLE_STATUS:
-                            last_error = LLMUnavailable(
-                                f"Retryable provider status: {response.status_code}"
-                            )
+                            last_error = LLMUnavailable(f"Retryable provider status: {response.status_code}")
                             if attempt < self.max_retries:
-                                await asyncio.sleep(
-                                    backoff_delay(
-                                        attempt, self.backoff_base_seconds
-                                    )
-                                )
+                                await asyncio.sleep(backoff_delay(attempt, self.backoff_base_seconds))
                                 continue
-                            raise LLMUnavailable(
-                                "Provider unavailable after retries"
-                            )
+                            raise LLMUnavailable("Provider unavailable after retries")
 
                         if response.status_code >= 400:
-                            raise LLMError(
-                                f"Provider request failed: {response.status_code}"
-                            )
+                            raise LLMError(f"Provider request failed: {response.status_code}")
 
                         async for line in response.aiter_lines():
                             if not line.startswith("data:"):
@@ -111,12 +100,8 @@ class OpenAICompatProvider:
                             usage_data = chunk.get("usage")
                             if usage_data:
                                 result.usage = Usage(
-                                    input_tokens=usage_data.get(
-                                        "prompt_tokens", 0
-                                    ),
-                                    output_tokens=usage_data.get(
-                                        "completion_tokens", 0
-                                    ),
+                                    input_tokens=usage_data.get("prompt_tokens", 0),
+                                    output_tokens=usage_data.get("completion_tokens", 0),
                                     estimated=False,
                                 )
 
@@ -130,10 +115,7 @@ class OpenAICompatProvider:
 
                         result.model = self.model
 
-                        if (
-                            result.usage.input_tokens == 0
-                            and result.usage.output_tokens == 0
-                        ):
+                        if result.usage.input_tokens == 0 and result.usage.output_tokens == 0:
                             result.usage = Usage(
                                 input_tokens=estimate_tokens(input_text),
                                 output_tokens=estimate_tokens(output_text),
@@ -145,22 +127,12 @@ class OpenAICompatProvider:
                     last_error = exc
 
                     if output_text:
-                        raise LLMUnavailable(
-                            "Provider connection failed after streaming began"
-                        ) from exc
+                        raise LLMUnavailable("Provider connection failed after streaming began") from exc
 
                     if attempt < self.max_retries:
-                        await asyncio.sleep(
-                            backoff_delay(
-                                attempt, self.backoff_base_seconds
-                            )
-                        )
+                        await asyncio.sleep(backoff_delay(attempt, self.backoff_base_seconds))
                         continue
 
-                    raise LLMUnavailable(
-                        "Provider unavailable after retries"
-                    ) from exc
+                    raise LLMUnavailable("Provider unavailable after retries") from exc
 
-        raise LLMUnavailable(
-            "Provider unavailable after retries"
-        ) from last_error
+        raise LLMUnavailable("Provider unavailable after retries") from last_error

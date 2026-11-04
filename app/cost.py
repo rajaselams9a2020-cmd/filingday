@@ -1,5 +1,5 @@
-
 """Append one JSON record per LLM call for cost tracking."""
+
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -12,10 +12,9 @@ def cost_usd(
     price_in_per_m: float,
     price_out_per_m: float,
 ) -> float:
-    return (
-        usage.input_tokens * price_in_per_m
-        + usage.output_tokens * price_out_per_m
-    ) / 1_000_000
+    return (usage.input_tokens * price_in_per_m + usage.output_tokens * price_out_per_m) / 1_000_000
+
+
 def log_call(
     path: str,
     *,

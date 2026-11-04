@@ -1,4 +1,3 @@
-
 """Extract text from PDF files for the GST RAG pipeline."""
 
 from pathlib import Path

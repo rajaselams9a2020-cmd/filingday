@@ -1,4 +1,3 @@
-
 import json
 import time
 from collections.abc import AsyncIterator
@@ -31,6 +30,8 @@ def health(settings: SettingsDep) -> dict:
         "app": settings.app_name,
         "environment": settings.environment,
     }
+
+
 @app.get("/ready")
 def ready(settings: SettingsDep):
     """Readiness check for the database."""
@@ -47,17 +48,14 @@ def ready(settings: SettingsDep):
             content={"status": "not ready", "database": "unavailable"},
         )
 
+
 @app.post("/chat")
 async def chat(request: ChatRequest, settings: SettingsDep) -> StreamingResponse:
 
     pdf_path = "data/gst_docs/faqs-registration.pdf"
     pages = extract_pdf_text(pdf_path)
 
-    user_questions = [
-        message.content
-        for message in request.messages
-        if message.role == "user"
-    ]
+    user_questions = [message.content for message in request.messages if message.role == "user"]
 
     if user_questions:
         relevant_pages = retrieve(user_questions[-1], pages, top_k=3)
@@ -72,14 +70,11 @@ async def chat(request: ChatRequest, settings: SettingsDep) -> StreamingResponse
     started = time.perf_counter()
 
     async def event_stream() -> AsyncIterator[str]:
-        
+
         ok = False
 
         try:
-            async for piece in provider.stream_chat(
-                rag_messages, request.temperature, result
-            ):
-                
+            async for piece in provider.stream_chat(rag_messages, request.temperature, result):
                 yield f"event: token\ndata: {json.dumps({'text': piece})}\n\n"
 
             ok = True

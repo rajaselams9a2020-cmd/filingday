@@ -5,10 +5,35 @@ import re
 from collections import Counter
 
 STOPWORDS = {
-    "a", "an", "and", "are", "as", "at", "be", "by",
-    "for", "from", "how", "in", "is", "it", "of", "on",
-    "or", "the", "to", "what", "when", "where", "which",
-    "who", "why", "with", "do", "does", "required",
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "how",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "what",
+    "when",
+    "where",
+    "which",
+    "who",
+    "why",
+    "with",
+    "do",
+    "does",
+    "required",
 }
 
 
@@ -32,29 +57,19 @@ def retrieve(
     if not question_tokens:
         return []
 
-    page_tokens = [
-        tokenize(page.get("text", ""))
-        for page in pages
-    ]
+    page_tokens = [tokenize(page.get("text", "")) for page in pages]
 
-    document_frequency = Counter(
-        token
-        for tokens in page_tokens
-        for token in tokens
-    )
+    document_frequency = Counter(token for tokens in page_tokens for token in tokens)
 
     scored_pages = []
 
-    for page, tokens in zip(pages, page_tokens,strict=True):
+    for page, tokens in zip(pages, page_tokens, strict=True):
         matched_tokens = question_tokens & tokens
 
         if not matched_tokens:
             continue
 
-        score = sum(
-            math.log(1 + len(pages) / (1 + document_frequency[token]))
-            for token in matched_tokens
-        )
+        score = sum(math.log(1 + len(pages) / (1 + document_frequency[token])) for token in matched_tokens)
 
         scored_pages.append((score, page))
 

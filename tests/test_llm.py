@@ -1,4 +1,3 @@
-
 import asyncio
 import json
 
@@ -20,10 +19,7 @@ def test_fake_provider_streams_answer():
         result = StreamResult()
         messages = [Message(role="user", content="What is GST?")]
 
-        pieces = [
-            piece
-            async for piece in provider.stream_chat(messages, 0.2, result)
-        ]
+        pieces = [piece async for piece in provider.stream_chat(messages, 0.2, result)]
 
         assert "What is GST?" in "".join(pieces)
         assert result.usage.input_tokens > 0
@@ -93,10 +89,7 @@ def test_openai_compat_retries_server_error():
             return httpx.Response(
                 200,
                 headers={"content-type": "text/event-stream"},
-                text=(
-                    'data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n'
-                    'data: [DONE]\n\n'
-                ),
+                text=('data: {"choices":[{"delta":{"content":"Hello"}}]}\n\ndata: [DONE]\n\n'),
             )
 
         provider = OpenAICompatProvider(
@@ -110,10 +103,7 @@ def test_openai_compat_retries_server_error():
         result = StreamResult()
         messages = [Message(role="user", content="Hi")]
 
-        pieces = [
-            piece
-            async for piece in provider.stream_chat(messages, 0.2, result)
-        ]
+        pieces = [piece async for piece in provider.stream_chat(messages, 0.2, result)]
 
         assert calls == 2
         assert "".join(pieces) == "Hello"
@@ -141,9 +131,7 @@ def test_openai_compat_does_not_retry_unauthorized():
         )
 
         try:
-            async for _ in provider.stream_chat(
-                [Message(role="user", content="Hi")], 0.2, StreamResult()
-            ):
+            async for _ in provider.stream_chat([Message(role="user", content="Hi")], 0.2, StreamResult()):
                 pass
         except LLMError:
             pass
@@ -174,9 +162,7 @@ def test_openai_compat_retries_timeout_before_output():
         )
 
         try:
-            async for _ in provider.stream_chat(
-                [Message(role="user", content="Hi")], 0.2, StreamResult()
-            ):
+            async for _ in provider.stream_chat([Message(role="user", content="Hi")], 0.2, StreamResult()):
                 pass
         except LLMUnavailable:
             pass
@@ -205,10 +191,7 @@ def test_fallback_used_when_primary_unavailable():
         result = StreamResult()
 
         pieces = [
-            piece
-            async for piece in provider.stream_chat(
-                [Message(role="user", content="GST?")], 0.2, result
-            )
+            piece async for piece in provider.stream_chat([Message(role="user", content="GST?")], 0.2, result)
         ]
 
         assert "GST?" in "".join(pieces)
@@ -229,14 +212,10 @@ def test_fallback_not_used_for_non_retryable_error():
             raise LLMError("bad request")
 
     async def run_test():
-        provider = FallbackProvider(
-            InvalidRequestProvider(), FakeProvider(model="fallback-model")
-        )
+        provider = FallbackProvider(InvalidRequestProvider(), FakeProvider(model="fallback-model"))
 
         try:
-            async for _ in provider.stream_chat(
-                [Message(role="user", content="GST?")], 0.2, StreamResult()
-            ):
+            async for _ in provider.stream_chat([Message(role="user", content="GST?")], 0.2, StreamResult()):
                 pass
         except LLMError:
             pass
@@ -256,16 +235,12 @@ def test_fallback_not_switched_after_output():
             raise LLMUnavailable("connection lost")
 
     async def run_test():
-        provider = FallbackProvider(
-            PartialThenBrokenProvider(), FakeProvider(model="fallback-model")
-        )
+        provider = FallbackProvider(PartialThenBrokenProvider(), FakeProvider(model="fallback-model"))
         result = StreamResult()
         pieces = []
 
         try:
-            async for piece in provider.stream_chat(
-                [Message(role="user", content="GST?")], 0.2, result
-            ):
+            async for piece in provider.stream_chat([Message(role="user", content="GST?")], 0.2, result):
                 pieces.append(piece)
         except LLMUnavailable:
             pass

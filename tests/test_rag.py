@@ -50,6 +50,8 @@ def test_retrieve_from_gst_pdf():
 
     assert len(results) > 0
     assert any("registration" in page["text"].lower() for page in results)
+
+
 def test_build_context_includes_source_and_page():
     pages = [
         {
@@ -70,10 +72,10 @@ def test_build_context_handles_empty_pages():
     context = build_context([])
 
     assert context == "No relevant information found in the GST documents."
+
+
 def test_build_rag_messages_adds_system_context():
-    messages = [
-        Message(role="user", content="How to register for GST?")
-    ]
+    messages = [Message(role="user", content="How to register for GST?")]
 
     context = "[Source: gst.pdf, Page: 5]\nGST registration requirements"
 
