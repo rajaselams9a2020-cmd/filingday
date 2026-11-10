@@ -63,17 +63,14 @@ async def ask_structured(
             return StructuredAnswer.model_validate_json(extract_json(text))
         except (ValidationError, ValueError, json.JSONDecodeError) as exc:
             if attempt == 1:
-                raise StructuredOutputError(
-                    f"Model returned invalid structured output: {exc}"
-                ) from exc
+                raise StructuredOutputError(f"Model returned invalid structured output: {exc}") from exc
 
             messages.extend(
                 [
                     Message(role="assistant", content=text),
                     Message(
                         role="user",
-                        content=f"Your previous answer was invalid: {exc}. "
-                        f"{JSON_INSTRUCTIONS}",
+                        content=f"Your previous answer was invalid: {exc}. {JSON_INSTRUCTIONS}",
                     ),
                 ]
             )

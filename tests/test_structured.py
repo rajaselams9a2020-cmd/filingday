@@ -22,8 +22,7 @@ class ScriptedProvider:
 
 def test_valid_json_is_accepted():
     provider = ScriptedProvider(
-        '{"answer": "GST registration is required", '
-        '"confidence": 0.9, "sources": ["FAQ, page 2"]}'
+        '{"answer": "GST registration is required", "confidence": 0.9, "sources": ["FAQ, page 2"]}'
     )
 
     answer = asyncio.run(ask_structured(provider, "When is GST registration required?"))

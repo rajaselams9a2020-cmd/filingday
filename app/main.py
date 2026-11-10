@@ -18,6 +18,8 @@ from app.schemas import ChatRequest
 from app.usage import get_usage
 
 app = FastAPI(title="Examate RAG starter", version="0.1.0")
+
+
 @app.get("/")
 def root() -> dict:
     return {
@@ -119,7 +121,6 @@ async def chat(request: ChatRequest, settings: SettingsDep) -> StreamingResponse
             )
             + "\n\n"
         )
-    
 
     return StreamingResponse(
         event_stream(),
