@@ -77,33 +77,24 @@ async def chat(request: ChatRequest, settings: SettingsDep) -> StreamingResponse
     started = time.perf_counter()
 
     async def event_stream() -> AsyncIterator[str]:
-
         ok = False
 
         try:
-            async for piece in provider.stream_chat(rag_messages, request.temperature, result):
+            async for piece in provider.stream_chat(
+                rag_messages,
+                request.temperature,
+                result,
+            ):
                 yield f"event: token\ndata: {json.dumps({'text': piece})}\n\n"
 
             ok = True
-            yield (
-                "event: done\ndata: "
-                + json.dumps(
-                    {
-                        "model": result.model or provider.model,
-                        "provider": provider.name,
-                        "usage": result.usage.model_dump(),
-                        "fallback_used": result.fallback_used,
-                    }
-                )
-                + "\n\n"
-            )
 
         except LLMError as exc:
             yield f"event: error\ndata: {json.dumps({'message': str(exc)})}\n\n"
 
         finally:
             latency_ms = int((time.perf_counter() - started) * 1000)
-            log_call(
+            record = log_call(
                 settings.cost_log_path,
                 provider=provider.name,
                 model=result.model or provider.model,
@@ -114,6 +105,21 @@ async def chat(request: ChatRequest, settings: SettingsDep) -> StreamingResponse
                 ok=ok,
                 fallback_used=result.fallback_used,
             )
+
+        yield (
+            "event: done\ndata: "
+            + json.dumps(
+                {
+                    "model": result.model or provider.model,
+                    "provider": provider.name,
+                    "usage": result.usage.model_dump(),
+                    "cost_usd": record["cost"],
+                    "fallback_used": result.fallback_used,
+                }
+            )
+            + "\n\n"
+        )
+    
 
     return StreamingResponse(
         event_stream(),

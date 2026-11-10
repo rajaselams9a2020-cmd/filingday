@@ -253,7 +253,7 @@ Run the test suite:
 python -m pytest -v
 ```
 
-The current test suite has **30 passing tests**.
+The current test suite has **33 passing tests**.
 
 Test coverage includes:
 
