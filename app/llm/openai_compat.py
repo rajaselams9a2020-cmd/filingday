@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import random
 from collections.abc import AsyncIterator
 
@@ -10,6 +11,7 @@ from app.schemas import Message, Usage
 from app.tokens import estimate_tokens
 
 RETRYABLE_STATUS = {429, 500, 502, 503, 504}
+logger = logging.getLogger(__name__)
 
 
 def backoff_delay(attempt: int, base: float, cap: float = 8.0) -> float:
@@ -75,10 +77,24 @@ class OpenAICompatProvider:
                         json=payload,
                     ) as response:
                         if response.status_code in RETRYABLE_STATUS:
-                            last_error = LLMUnavailable(f"Retryable provider status: {response.status_code}")
+                            await response.aread()
+                            error_body = response.text[:500]
+
+                            logging.warning(
+                                "LLM provider retryable response: status=%s body=%s",
+                                response.status_code,
+                                error_body,
+                            )
+
+                            last_error = LLMUnavailable(
+                                f"Retryable provider status: {response.status_code}"
+                            )
                             if attempt < self.max_retries:
-                                await asyncio.sleep(backoff_delay(attempt, self.backoff_base_seconds))
+                                await asyncio.sleep(
+                                    backoff_delay(attempt, self.backoff_base_seconds)
+                                )
                                 continue
+
                             raise LLMUnavailable("Provider unavailable after retries")
 
                         if response.status_code >= 400:
