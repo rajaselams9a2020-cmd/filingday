@@ -86,13 +86,9 @@ class OpenAICompatProvider:
                                 error_body,
                             )
 
-                            last_error = LLMUnavailable(
-                                f"Retryable provider status: {response.status_code}"
-                            )
+                            last_error = LLMUnavailable(f"Retryable provider status: {response.status_code}")
                             if attempt < self.max_retries:
-                                await asyncio.sleep(
-                                    backoff_delay(attempt, self.backoff_base_seconds)
-                                )
+                                await asyncio.sleep(backoff_delay(attempt, self.backoff_base_seconds))
                                 continue
 
                             raise LLMUnavailable("Provider unavailable after retries")
