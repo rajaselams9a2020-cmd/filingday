@@ -1,6 +1,6 @@
 """Format retrieved GST pages as context for an LLM."""
 
-
+from app.prompts import SYSTEM_PROMPT
 from app.schemas import Message
 
 
@@ -20,6 +20,7 @@ def build_context(pages: list[dict]) -> str:
 def build_rag_messages(messages: list[Message], context: str) -> list[Message]:
     """Add the Filingday rules and retrieved GST context to the conversation."""
     rag_instruction = (
+        f"{SYSTEM_PROMPT.strip()}\n\n"
         "Answer the user's question using the GST document context below. "
         "If the context does not contain the answer, say that the document "
         "does not provide enough information. Cite the source and page number. "
