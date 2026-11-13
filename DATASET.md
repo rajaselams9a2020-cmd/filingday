@@ -21,9 +21,9 @@ Full data lives in `data/raw/` (not committed). A 2–3 file sample is in `data/
 
 ## Parsing
 
-Command: `python -m app.ingest.parse data/gst_docs --limit 50`
+Command: `python -m app.ingest.parse data --limit 50`
 
-Result: 1 document | 34 pages | 34 text pages | 23 tables detected
+Result: 5 documents | 50 pages | 1 HTML | 49 text | 27 tables
 OCR: 0 | Needs OCR: 0 | Empty: 0
 
 A numbered-heading fallback was added because the GST FAQ headings were not detected by font-size rules. Dotted table-of-contents lines are skipped.
