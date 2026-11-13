@@ -3,7 +3,6 @@ import time
 from collections.abc import AsyncIterator
 from typing import Annotated
 
-import psycopg
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -48,6 +47,8 @@ def ready(settings: SettingsDep):
         return {"status": "ready", "database": "not configured"}
 
     try:
+        import psycopg
+
         with psycopg.connect(settings.database_url, connect_timeout=3) as conn:
             conn.execute("SELECT 1")
         return {"status": "ready", "database": "connected"}
